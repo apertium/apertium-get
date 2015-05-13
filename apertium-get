@@ -1,0 +1,101 @@
+#!/bin/bash
+
+set -e -u
+
+if [[ $# -ne 1 ]]; then
+    cat <<EOF
+Usage: $0 PAIR
+e.g.
+$0 nno-nob
+to download and set up nno-nob along with nno and nob dependencies.
+EOF
+    exit 1
+fi
+
+### Globals:
+
+declare -r svnroot=https://svn.code.sf.net/p/apertium/svn/
+declare -ar pmodules=(trunk staging nursery incubator)
+declare -ar lmodules=(languages incubator)
+
+
+### Functions:
+discover_url () {
+    local dir=$1
+    local url=
+    local -a modules
+    if [[ ${dir} = *-*-* ]]; then
+        modules=( ${pmodules[@]} )
+    else
+        modules=( ${lmodules[@]} )
+    fi
+    for module in "${modules[@]}"; do
+        url="${svnroot}${module}/${dir}"
+        if svn info "${url}" &>/dev/null; then
+            echo "Assuming SVN url of ${dir} is ${url}" >&2
+            echo "${url}"
+            return 0
+        fi
+    done
+    echo "Couldn't find SVN url of ${dir}" >&2
+    return 1
+}
+
+get_dir () {
+    local dir=$1
+    local url=
+    if [[ -d ${dir} ]]; then
+        cd "${dir}"
+        pwd
+        svn up
+        cd - >/dev/null
+    else
+        url=$(discover_url "${dir}")
+        svn checkout "${url}"
+    fi
+}
+
+main () {
+    local -r pair=apertium-${1##apertium-}
+
+    get_dir "${pair}"
+    declare -a deps=()
+    declare -a depn=()
+    while read -r n dep; do
+        deps+=("${dep}")
+        depn+=("${n}")
+    done < <(awk -F'[][[:space:]]+' '/^ *AP_CHECK_LING\(/ && $2 && $4 {print $2, $4}' "${pair}"/configure.ac)
+
+    if [[ ${#deps[@]} -ne 0 ]]; then
+        for dep in "${deps[@]}"; do
+            if get_dir "${dep}"; then
+                cd "${dep}"
+                pwd
+                ./autogen.sh
+                make -j3
+                cd - >/dev/null
+            else
+                echo "WARNING: Skipping dependency ${dep}; pair ${pair} might not get set up correctly."
+            fi
+        done
+    fi
+    cd "${pair}"
+    autogen="./autogen.sh "
+    for i in "${!depn[@]}"; do
+        autogen="${autogen} --with-lang${depn[i]}=../${deps[i]}"
+    done
+    ${autogen}
+    make -j3
+    make test || echo "make test failed, but that's probably fine."
+
+    cat <<EOF
+
+All done!
+
+You can now "cd ${pair}" or one of the dependencies, edit some files
+and type "make -j3 langs" to compile again.
+
+EOF
+}
+
+main "$@"

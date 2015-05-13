@@ -1,0 +1,16 @@
+* apertium-get
+
+  This is a little script to quickly get an Apertium language pair
+  (with its monolingual dependencies) set up for development. It's
+  meant for developers and people interested in hacking on the
+  language data; if you just want to run the newest translators you
+  should use the [[http://wiki.apertium.org/wiki/Installation][nightly repositories]].
+
+** Usage
+
+   You'll need the newest Apertium development dependencies installed
+   first, follow the "Prerequisites" step at
+   http://wiki.apertium.org/wiki/Installation but just skip installing
+   any language data in the "Minimal installation from SVN" step –
+   that's what this script handles.
+
