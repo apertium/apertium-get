@@ -21,7 +21,7 @@ declare -ar lmodules=(languages incubator)
 
 ### Functions:
 discover_url () {
-    local dir=$1
+    local -r dir=$1
     local url=
     local -a modules
     if [[ ${dir} = *-*-* ]]; then
@@ -42,7 +42,7 @@ discover_url () {
 }
 
 get_dir () {
-    local dir=$1
+    local -r dir=$1
     local url=
     if [[ -d ${dir} ]]; then
         cd "${dir}"
@@ -59,6 +59,7 @@ main () {
     local -r pair=apertium-${1##apertium-}
 
     get_dir "${pair}"
+    # Mac has ancient bash, so no declare -A for us
     declare -a deps=()
     declare -a depn=()
     while read -r n dep; do

@@ -1,3 +1,5 @@
+#+STARTUP: showall
+
 * apertium-get
 
   This is a little script to quickly get an Apertium language pair
@@ -14,3 +16,17 @@
    any language data in the "Minimal installation from SVN" step –
    that's what this script handles.
 
+   Then, to install the pair "fie-bar" along with its data
+   dependencies apertium-fie and apertium-bar, just do:
+
+#+BEGIN_SRC sh
+wget https://raw.githubusercontent.com/unhammer/apertium-get/master/apertium-get
+chmod +x apertium-get
+./apertium-get fie-bar
+#+END_SRC
+
+   The data will be placed under your current working directory. If
+   you later run =apertium-get fie-fum= from the same directory, it'll
+   just update apertium-fie, not redownload it (so you can actually
+   use this script as a simple way to do =svn up && make= for a pair
+   and its dependencies as well).
