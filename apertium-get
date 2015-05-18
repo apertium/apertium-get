@@ -2,16 +2,6 @@
 
 set -e -u
 
-if [[ $# -ne 1 ]]; then
-    cat <<EOF
-Usage: $0 PAIR
-e.g.
-$0 nno-nob
-to download and set up nno-nob along with nno and nob dependencies.
-EOF
-    exit 1
-fi
-
 ### Globals:
 
 declare -r svnroot=https://svn.code.sf.net/p/apertium/svn/
@@ -55,7 +45,7 @@ get_dir () {
     fi
 }
 
-main () {
+get_data () {
     local -r pair=apertium-${1##apertium-}
 
     get_dir "${pair}"
@@ -97,6 +87,38 @@ You can now "cd ${pair}" or one of the dependencies, edit some files
 and type "make -j3 langs" to compile again.
 
 EOF
+}
+
+list_pairs () {
+    local url=
+    for module in "${pmodules[@]}"; do
+        echo "# Pairs in ${module}:"
+        url="${svnroot}${module}/"
+        svn ls "${url}" \
+            | grep '^apertium-[[:alpha:]]\{2,3\}-[[:alpha:]]\{2,3\}/*$' \
+            | sed 's%^apertium-%%; s%/$%%'
+        echo
+    done
+}
+
+main () {
+    if [[ $# -ne 1 ]]; then
+        cat <<EOF
+Usage: $0 PAIR
+e.g.
+$0 nno-nob
+to download and set up nno-nob along with nno and nob dependencies.
+
+or: $0 -l
+to list available pairs.
+EOF
+        exit 1
+    fi
+
+    case $1 in
+        -l) list_pairs ;;
+        *) get_data "$@" ;;
+    esac
 }
 
 main "$@"
