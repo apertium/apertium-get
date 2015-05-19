@@ -27,7 +27,7 @@ discover_url () {
             return 0
         fi
     done
-    echo "Couldn't find SVN url of ${dir}" >&2
+    echo "WARNING: Couldn't find SVN url of ${dir}" >&2
     return 1
 }
 
@@ -89,9 +89,71 @@ and type "make -j3 langs" to compile again.
 EOF
 }
 
+show_help () {
+        cat <<EOF
+USAGE
+       ${0##*/} PAIR
+       ${0##*/} -l [MODULE...]
+
+DESCRIPTION
+       Run with just one argument, it will download and set up the
+       Apertium development data for the specified language pair.
+
+       With the -l option, it will list available language pairs. Give
+       one or more MODULE arguments to list only pairs in that SVN
+       module (one of "trunk", "staging", "nursery", "incubator").
+
+OPTIONS
+       -h          display this help and exit
+       -l          list available packages instead of setting up data
+
+EXAMPLES
+       ${0##*/} nno-nob
+
+       Download and set up apertium-nno-nob, along with its nno and
+       nob dependencies.
+
+       ${0##*/} -l trunk
+
+       List available language pairs in SVN trunk.
+
+       ${0##*/} -l | grep kaz
+
+       List available language pairs involving Kazakh.
+EOF
+}
+
+is_in () {
+    local -r pattern="$1"
+    local element
+    shift
+
+    for element; do
+        [[ $element = $pattern ]] && return 0
+    done
+    return 1
+}
+
 list_pairs () {
+    local -a modules=("$@")
+    local module
+
+    # Defaulting to all modules:
+    if [[ ${#modules[@]} -eq 0 ]]; then
+        modules=( ${pmodules[@]} )
+    fi
+    # Sanity-check input:
+    for module in "${modules[@]}"; do
+        if ! is_in "${module}" "${pmodules[@]}"; then
+            echo "ERROR: '${module}' not recognised as an SVN language pair module"'!' >&2
+            echo >&2
+            show_help >&2
+            exit 1
+        fi
+    done
+
     local url=
-    for module in "${pmodules[@]}"; do
+    for module in "${modules[@]}"; do
         echo "# Pairs in ${module}:"
         url="${svnroot}${module}/"
         svn ls "${url}" \
@@ -102,23 +164,38 @@ list_pairs () {
 }
 
 main () {
-    if [[ $# -ne 1 ]]; then
-        cat <<EOF
-Usage: $0 PAIR
-e.g.
-$0 nno-nob
-to download and set up nno-nob along with nno and nob dependencies.
 
-or: $0 -l
-to list available pairs.
-EOF
-        exit 1
+    local do_list=false
+    while getopts ":hl" opt; do
+        case "$opt" in
+            h)
+                show_help
+                exit 0
+                ;;
+            l)
+                do_list=true
+                ;;
+            \?)
+                echo "ERROR: Invalid option: -$OPTARG" >&2
+                echo >&2
+                show_help >&2
+                exit 1
+                ;;
+        esac
+    done
+    shift "$((OPTIND-1))"
+
+    if ${do_list}; then
+        list_pairs "$@"
+    else
+        if [[ $# -ne 1 ]]; then
+            echo "ERROR: No language pair specified." >&2
+            echo >&2
+            show_help >&2
+            exit 1
+        fi
+        get_data "$@"
     fi
-
-    case $1 in
-        -l) list_pairs ;;
-        *) get_data "$@" ;;
-    esac
 }
 
 main "$@"
