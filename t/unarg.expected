@@ -1,0 +1,31 @@
+ERROR: Invalid option: -?
+
+USAGE
+       apertium-get PAIR
+       apertium-get -l [MODULE...]
+
+DESCRIPTION
+       Run with just one argument, it will download and set up the
+       Apertium development data for the specified language pair.
+
+       With the -l option, it will list available language pairs. Give
+       one or more MODULE arguments to list only pairs in that SVN
+       module (one of "trunk", "staging", "nursery", "incubator").
+
+OPTIONS
+       -h          display this help and exit
+       -l          list available packages instead of setting up data
+
+EXAMPLES
+       apertium-get nno-nob
+
+       Download and set up apertium-nno-nob, along with its nno and
+       nob dependencies.
+
+       apertium-get -l trunk
+
+       List available language pairs in SVN trunk.
+
+       apertium-get -l | grep kaz
+
+       List available language pairs involving Kazakh.
