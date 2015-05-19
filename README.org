@@ -30,3 +30,7 @@ chmod +x apertium-get
    just update apertium-fie, not redownload it (so you can actually
    use this script as a simple way to do =svn up && make= for a pair
    and its dependencies as well).
+
+   You can also get a listing of available pairs by passing the =-l=
+   argument to =apertium-get=, see =apertium-get -h= for more
+   information.
