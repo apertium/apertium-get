@@ -20,7 +20,7 @@ diff <("${prog}" -l incubator) incubator.expected
 echo "Full listing should be big …"
 [[ $("${prog}" -l | wc -l) -ge 200 ]]
 
-echo "Try to install nno-nob …"
+echo "Try to set up nno-nob …"
 (
     cd "${tmp}"
     "${prog}" nno-nob 2>&1
@@ -28,7 +28,7 @@ echo "Try to install nno-nob …"
     make test >&2
 ) > nno-nob.log
 
-echo "Try to install en-es …"
+echo "Try to set up en-es …"
 (
     cd "${tmp}"
     "${prog}" en-es 2>&1
