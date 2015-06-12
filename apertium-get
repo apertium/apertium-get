@@ -8,9 +8,15 @@ declare -r svnroot=https://svn.code.sf.net/p/apertium/svn/
 declare -ar pmodules=(trunk staging nursery incubator)
 declare -ar lmodules=(languages incubator)
 
+declare -r svnroot_giella=https://victorio.uit.no/langtech/trunk
+GTHOME=$(pwd)
+GTCORE=$GTHOME/gtcore
+export GTHOME
+export GTCORE
+
 
 ### Functions:
-discover_url () {
+discover_url_apertium () {
     local -r dir=$1
     local url=
     local -a modules
@@ -30,9 +36,49 @@ discover_url () {
     echo "WARNING: Couldn't find SVN url of ${dir}" >&2
     return 1
 }
-
-get_dir () {
+discover_url_giella () {
     local -r dir=$1
+    local -r url="${svnroot_giella}/${dir}"
+    echo "Assuming SVN url of ${dir} is ${url}" >&2
+    echo "${url}"
+}
+
+dir_of_dep () {
+    if [[ $1 = giella-* ]]; then
+        echo "langs/${1##giella-}"
+    else
+        echo "$1"
+    fi
+}
+bins_of_dep () {
+    if [[ $1 = giella-* ]]; then
+        echo "langs/${1##giella-}/tools/mt/apertium"
+    else
+        echo "$1"
+    fi
+}
+
+make_dep () {
+    local -r dep=$1
+    local -r dir=$(dir_of_dep "${dep}")
+    cd "${dir}"
+    pwd
+    ./autogen.sh
+    if [[ ${dep} = giella-* ]]; then
+        ./configure --enable-apertium --with-hfst --without-xfst  --disable-spellers --disable-analysers --disable-generators
+        make                    # giella so memory hungry, -j1
+    elif [[ ${dep} = gtcore ]]; then
+        ./configure
+        make -j3
+    else
+        make -j3
+    fi
+    cd - >/dev/null
+}
+
+get_dep () {
+    local -r dep=$1
+    local -r dir=$(dir_of_dep "${dep}")
     local url=
     if [[ -d ${dir} ]]; then
         cd "${dir}"
@@ -40,31 +86,36 @@ get_dir () {
         svn up
         cd - >/dev/null
     else
-        url=$(discover_url "${dir}")
-        svn checkout "${url}"
+        if [[ ${dep} = giella-* || ${dep} = gtcore ]]; then
+            url=$(discover_url_giella "${dir}")
+        else
+            url=$(discover_url_apertium "${dir}")
+        fi
+        svn checkout "${url}" "${dir}"
     fi
 }
 
 get_data () {
     local -r pair=apertium-${1##apertium-}
+    local depdir=
 
-    get_dir "${pair}"
+    get_dep "${pair}"
     # Mac has ancient bash, so no declare -A for us
     declare -a deps=()
     declare -a depn=()
     while read -r n dep; do
-        deps+=("${dep}")
-        depn+=("${n}")
+        deps+=( "${dep}" )
+        depn+=( "${n}" )
     done < <(awk -F'[][[:space:]]+' '/^ *AP_CHECK_LING\(/ && $2 && $4 {print $2, $4}' "${pair}"/configure.ac)
 
     if [[ ${#deps[@]} -ne 0 ]]; then
         for dep in "${deps[@]}"; do
-            if get_dir "${dep}"; then
-                cd "${dep}"
-                pwd
-                ./autogen.sh
-                make -j3
-                cd - >/dev/null
+            if [[ ${dep} = giella-* ]]; then
+                get_dep gtcore
+                make_dep gtcore
+            fi
+            if get_dep "${dep}"; then
+                make_dep "${dep}"
             else
                 echo "WARNING: Skipping dependency ${dep}; pair ${pair} might not get set up correctly."
             fi
@@ -73,7 +124,8 @@ get_data () {
     cd "${pair}"
     autogen="./autogen.sh "
     for i in "${!depn[@]}"; do
-        autogen="${autogen} --with-lang${depn[i]}=../${deps[i]}"
+        binsdir=$(bins_of_dep "${deps[i]}")
+        autogen="${autogen} --with-lang${depn[i]}=../${binsdir}"
     done
     ${autogen}
     make -j3
@@ -90,7 +142,7 @@ EOF
 }
 
 show_help () {
-        cat <<EOF
+    cat <<EOF
 USAGE
        ${0##*/} PAIR
        ${0##*/} -l [MODULE...]
@@ -164,7 +216,6 @@ list_pairs () {
 }
 
 main () {
-
     local do_list=false
     while getopts ":hl" opt; do
         case "$opt" in
