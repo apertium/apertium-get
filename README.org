@@ -8,7 +8,7 @@
   language data; if you just want to run the newest translators you
   should use the [[http://wiki.apertium.org/wiki/Installation][nightly repositories]].
 
-** Usage
+** Prerequisites
 
    You'll need the newest Apertium development dependencies installed
    first, follow the "Prerequisites" step at
@@ -16,8 +16,22 @@
    any language data in the "Minimal installation from SVN" step –
    that's what this script handles.
 
-   Then, to install the pair "fie-bar" along with its data
-   dependencies apertium-fie and apertium-bar, just do:
+   This should give you the "core tools", ie.:
+   - apertium
+   - lttoolbox
+   - apertium-lex-tools
+   - vislcg3
+   - hfst
+
+   Not all language pairs depend on all the core tools, but since you
+   can get core tools from the nightly repos, it's easiest to just get
+   them all at once.
+
+** Usage
+
+   Assuming you have the core tools installed, you can get the pair
+   "fie-bar" along with its data dependencies apertium-fie and
+   apertium-bar downloaded and compiled by simply doing
 
 #+BEGIN_SRC sh
 wget https://raw.githubusercontent.com/unhammer/apertium-get/master/apertium-get
