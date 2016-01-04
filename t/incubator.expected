@@ -12,6 +12,7 @@ br-cy
 br-es
 bua-khk
 cat-cos
+cat-ina
 ces-ces
 ces-hbs
 ces-rus
@@ -35,9 +36,10 @@ en-mt
 en-nl
 en-pl
 en-sq
+eng-deu
 eng-ita
-eng-kaz
 eng-lvs
+eng-pes
 eng-sco
 eng-tel
 eo-be
@@ -58,7 +60,6 @@ eo-pt
 eo-sk
 eo-sv
 eo-tr
-es-de
 es-ia
 est-nor
 eu-fr
@@ -67,6 +68,7 @@ eus-fin
 eus-sme
 fao-dan
 fin-ces
+fin-deu
 fin-est
 fin-gle
 fin-hbs
@@ -80,10 +82,12 @@ fkv-fin
 fo-nb
 fr-nl
 fra-eng
+fra-ina
 fra-ron
 ga-gv
 gle-eng
 guc-spa
+hin-pan
 ht-en
 hun-eng
 isl-rus
@@ -96,6 +100,7 @@ kaz-tyv
 kaz-uig
 khk-kaz
 kir-uzb
+kmr-eng
 kpv-fin
 kpv-mhr
 kv-ru
@@ -115,6 +120,7 @@ mk-sq
 mlt-spa
 mrj-fin
 myv-fin
+myv-mdf
 ne-en
 nog-kaz
 oc-fr
@@ -140,13 +146,15 @@ sjo-eng
 sl-mk
 slv-ita
 slv-pol
+sma-nob
 sme-deu
-sme-smn
 sme-spa
+smj-nob
+snd-hin
+spa-deu
 spa-pol
 sw-rn
 swe-dan
-swe-nor
 tat-kir
 tel-mar
 tgl-ceb
@@ -154,6 +162,8 @@ tha-eng
 tr-en
 ur-fa
 ur-pa
+urd-snd
+uzb-kaa
 vi-en
 zho-spa
 zu-xh
