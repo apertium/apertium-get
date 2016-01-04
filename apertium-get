@@ -95,22 +95,39 @@ get_dep () {
     fi
 }
 
+in_array () {
+  local e
+  for e in "${@:2}"; do
+      [[ "$e" == "$1" ]] && return 0
+  done
+  return 1
+}
+
 get_pair () {
     local -r pair=apertium-${1##apertium-}
+    local -r skip="${@:2}"
 
     get_dep "${pair}"
     # Mac has ancient bash, so no declare -A for us
-    declare -a deps=()
-    declare -a depn=()
+    local -a deps=()
+    local -a depn=()
     while read -r n dep; do
-        deps+=( "${dep}" )
-        depn+=( "${n}" )
+        local orglang=$(split_org_langs "${dep}")
+        local lang=${orglang##* }
+        if in_array "${lang}" ${skip[@]}; then
+            echo
+            echo "Skipping data ${dep} as instructed."
+            echo
+        else
+            deps+=( "${dep}" )
+            depn+=( "${n}" )
+        fi
     done < <(awk -F'[][[:space:]]+' '/^ *AP_CHECK_LING\(/ && $2 && $4 {print $2, $4}' "${pair}"/configure.ac)
 
     if [[ ${#deps[@]} -ne 0 ]]; then
         for dep in "${deps[@]}"; do
             if ! get_data "${dep}"; then
-                echo "WARNING: Skipping dependency ${dep}; pair ${pair} might not get set up correctly."
+                echo "WARNING: Couldn't get dependency ${dep}; pair ${pair} might not get set up correctly."
             fi
         done
     fi
@@ -134,18 +151,26 @@ and type "make -j3 langs" to compile again.
 EOF
 }
 
-get_data () {
+split_org_langs () {
     local -r org=$( if [[ $1 = giella-* ]]; then echo giella; else echo apertium; fi )
     local -r langs=${1#${org}-}
+    echo "${org} ${langs}"
+}
+
+get_data () {
+    local -r orglangs=$(split_org_langs "$1")
+    local -r org=${orglangs%% *}
+    local -r langs=${orglangs##* }
+
     if [[ ${langs} = *-* ]]; then
-        get_pair "$1"
+        get_pair "$@"
     else
         if [[ $org = giella ]]; then
             get_dep gtcore
             make_dep gtcore
         fi
-        if get_dep "${dep}"; then
-            make_dep "${dep}"
+        if get_dep "$1"; then
+            make_dep "$1"
         else
             return 1
         fi
@@ -169,12 +194,21 @@ DESCRIPTION
 OPTIONS
        -h          display this help and exit
        -l          list available packages instead of setting up data
+       -x DEP      skip data dependency DEP (useful if DEP is installed
+                   through a package manager); may be specified multiple
+                   times
 
 EXAMPLES
        ${0##*/} nno-nob
 
        Download and set up apertium-nno-nob, along with its nno and
        nob dependencies.
+
+       sudo apt-get install giella-sme
+       ${0##*/} -x sme sme-nob
+
+       Install giella-sme through apt-get, then install download and set
+       up apertium-sme-nob, along with the nob dependency (but not sme).
 
        ${0##*/} -l trunk
 
@@ -228,11 +262,15 @@ list_pairs () {
 
 main () {
     local do_list=false
-    while getopts ":hl" opt; do
+    local -a skip=()
+    while getopts ":hlx:" opt; do
         case "$opt" in
             h)
                 show_help
                 exit 0
+                ;;
+            x)
+                skip+=( "${OPTARG}" )
                 ;;
             l)
                 do_list=true
@@ -250,13 +288,15 @@ main () {
     if ${do_list}; then
         list_pairs "$@"
     else
-        if [[ $# -ne 1 ]]; then
+        if [[ $# -lt 1 ]]; then
             echo "ERROR: No language pair specified." >&2
             echo >&2
             show_help >&2
             exit 1
         fi
-        get_data "$@"
+        for d in "$@"; do
+            get_data "$d" "${skip[@]:-}"
+        done
     fi
 }
 

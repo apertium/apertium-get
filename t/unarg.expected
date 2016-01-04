@@ -15,12 +15,21 @@ DESCRIPTION
 OPTIONS
        -h          display this help and exit
        -l          list available packages instead of setting up data
+       -x DEP      skip data dependency DEP (useful if DEP is installed
+                   through a package manager); may be specified multiple
+                   times
 
 EXAMPLES
        apertium-get nno-nob
 
        Download and set up apertium-nno-nob, along with its nno and
        nob dependencies.
+
+       sudo apt-get install giella-sme
+       apertium-get -x sme sme-nob
+
+       Install giella-sme through apt-get, then install download and set
+       up apertium-sme-nob, along with the nob dependency (but not sme).
 
        apertium-get -l trunk
 

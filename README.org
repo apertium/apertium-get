@@ -48,3 +48,15 @@ chmod +x apertium-get
    You can also get a listing of available pairs by passing the =-l=
    argument to =apertium-get=, see =apertium-get -h= for more
    information.
+
+
+   If you installed a monolingual dependency through =apt-get= or
+   similar (or otherwise have it installed in your =PKG_CONFIG_PATH=),
+   then you can choose to skip that dependency and use the installed
+   version with =-x DEP=. For example, to avoid compiling the sme
+   package before getting apertium-sme-nob, do:
+
+#+BEGIN_SRC sh
+sudo apt-get install giella-sme
+./apertium-get -x sme sme-nob
+#+END_SRC

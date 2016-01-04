@@ -23,7 +23,7 @@ echo "Full listing should be big …"
 echo "Try to set up nno-nob …"
 (
     cd "${tmp}"
-    "${prog}" nno-nob 2>&1
+    "${prog}" -x foo -x bar nno-nob 2>&1
     cd apertium-nno-nob
     make test >&2
 ) > nno-nob.log
