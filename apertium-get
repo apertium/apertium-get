@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -u
+[[ "${BASH_SOURCE[0]}" != "${0}" ]] || set -e -u
 
 ### Globals:
 
@@ -95,7 +95,7 @@ get_dep () {
     fi
 }
 
-get_data () {
+get_pair () {
     local -r pair=apertium-${1##apertium-}
 
     get_dep "${pair}"
@@ -109,13 +109,7 @@ get_data () {
 
     if [[ ${#deps[@]} -ne 0 ]]; then
         for dep in "${deps[@]}"; do
-            if [[ ${dep} = giella-* ]]; then
-                get_dep gtcore
-                make_dep gtcore
-            fi
-            if get_dep "${dep}"; then
-                make_dep "${dep}"
-            else
+            if ! get_data "${dep}"; then
                 echo "WARNING: Skipping dependency ${dep}; pair ${pair} might not get set up correctly."
             fi
         done
@@ -138,6 +132,24 @@ You can now "cd ${pair}" or one of the dependencies, edit some files
 and type "make -j3 langs" to compile again.
 
 EOF
+}
+
+get_data () {
+    local -r org=$( if [[ $1 = giella-* ]]; then echo giella; else echo apertium; fi )
+    local -r langs=${1#${org}-}
+    if [[ ${langs} = *-* ]]; then
+        get_pair "$1"
+    else
+        if [[ $org = giella ]]; then
+            get_dep gtcore
+            make_dep gtcore
+        fi
+        if get_dep "${dep}"; then
+            make_dep "${dep}"
+        else
+            return 1
+        fi
+    fi
 }
 
 show_help () {
@@ -248,4 +260,8 @@ main () {
     fi
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    echo "${BASH_SOURCE[0]} is being sourced; chmod +x and use ./${BASH_SOURCE[0]} to actually run." >&2
+else
+    main "$@"
+fi
