@@ -4,7 +4,12 @@ set -e -u
 
 
 cd "$(dirname "$0")"
-prog=$(realpath ../apertium-get)
+
+canonpath () {
+    # OS X doesn't have realpath :-/
+    realpath "$1" 2>/dev/null || greadlink -f "$1" 2>/dev/null || ( cd "$(dirname "$1")" && echo "$(pwd)"/"$(basename "$1")")
+}
+prog=$(canonpath ../apertium-get)
 
 tmp=$(mktemp -d -t apertium-get.XXXXXXXXXXX)
 trap 'rm -rf "${tmp}"' EXIT
@@ -26,12 +31,12 @@ echo "Try to set up nno-nob …"
     "${prog}" -x foo -x bar nno-nob 2>&1
     cd apertium-nno-nob
     make test >&2
-) > nno-nob.log
+) > nno-nob.log || ( cat nno-nob.log; exit 1 )
 
-echo "Try to set up en-es …"
+echo "Try to set up fr-es …"
 (
     cd "${tmp}"
-    "${prog}" en-es 2>&1
-    cd apertium-en-es
+    "${prog}" fr-es 2>&1
+    cd apertium-fr-es
     make test >&2
-) > en-es.log
+) > fr-es.log || ( cat fr-es.log; exit 1 )

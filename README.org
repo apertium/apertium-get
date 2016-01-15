@@ -1,5 +1,8 @@
 #+STARTUP: showall
 
+#+CAPTION: Build Status
+[[https://travis-ci.org/unhammer/apertium-get][https://travis-ci.org/unhammer/apertium-get.svg]]
+
 * apertium-get
 
   This is a little script to quickly get an Apertium language pair

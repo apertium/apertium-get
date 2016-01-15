@@ -2,4 +2,9 @@
 
 cd "$(dirname "$0")"
 
-bash tests.sh || echo "TEST FAILED"
+bash tests.sh
+res=$?
+if [[ ${res} -ne 0 ]];then
+    echo "TEST FAILED"
+fi
+exit ${res}
