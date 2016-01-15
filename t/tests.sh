@@ -14,8 +14,8 @@ trap 'rm -rf "${tmp}"' EXIT
 echo "Show help …"
 diff <("${prog}" -? 2>&1) unarg.expected
 
-echo "List incubator …"
-diff <("${prog}" -l incubator) incubator.expected
+echo "List trunk …"
+diff <("${prog}" -l trunk) trunk.expected
 
 echo "Full listing should be big …"
 [[ $("${prog}" -l | wc -l) -ge 200 ]]
