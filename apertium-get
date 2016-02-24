@@ -9,10 +9,6 @@ declare -ar pmodules=(trunk staging nursery incubator)
 declare -ar lmodules=(languages incubator)
 
 declare -r svnroot_giella=https://victorio.uit.no/langtech/trunk
-GTHOME=$(pwd)
-GTCORE=$GTHOME/gtcore
-export GTHOME
-export GTCORE
 
 
 ### Functions:
@@ -63,6 +59,11 @@ make_dep () {
     local -r dir=$(dir_of_dep "${dep}")
     cd "${dir}"
     pwd
+    # Let cwd be GTHOME from here on in; langs should exist under this dir:
+    GTHOME=$(pwd)
+    GTCORE=$GTHOME/gtcore
+    export GTHOME
+    export GTCORE
     ./autogen.sh
     if [[ ${dep} = giella-* ]]; then
         ./configure --enable-apertium --with-hfst --without-xfst  --disable-spellers --disable-analysers --disable-generators
@@ -96,11 +97,11 @@ get_dep () {
 }
 
 in_array () {
-  local e
-  for e in "${@:2}"; do
-      [[ "$e" == "$1" ]] && return 0
-  done
-  return 1
+    local e
+    for e in "${@:2}"; do
+        [[ "$e" == "$1" ]] && return 0
+    done
+    return 1
 }
 
 get_pair () {
@@ -126,6 +127,16 @@ get_pair () {
 
     if [[ ${#deps[@]} -ne 0 ]]; then
         for dep in "${deps[@]}"; do
+            local orglang=$(split_org_langs "${dep}")
+            local org=${orglang%% *}
+            local lang=${orglang##* }
+            if [[ ${org} = giella && -d $GTHOME/langs/${lang} ]]; then
+                echo
+                echo "Found ${dep} in your \$GTHOME, symlinking to that to avoid recompilation."
+                echo
+                test -d langs || mkdir langs
+                ln -sf "$GTHOME/langs/sme" langs/sme
+            fi
             if ! get_data "${dep}"; then
                 echo "WARNING: Couldn't get dependency ${dep}; pair ${pair} might not get set up correctly."
             fi
