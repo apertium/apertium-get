@@ -82,10 +82,11 @@ get_dep () {
     local -r dir=$(dir_of_dep "${dep}")
     local url=
     if [[ -d ${dir} ]]; then
-        cd "${dir}"
-        pwd
-        svn up
-        cd - >/dev/null
+        (
+            cd "${dir}"
+            printf "Updating existing %s (%s)\n" "${dir}" "$(pwd)"
+            svn up
+        )
     else
         if [[ ${dep} = giella-* || ${dep} = gtcore ]]; then
             url=$(discover_url_giella "${dir}")
@@ -106,16 +107,17 @@ in_array () {
 
 get_pair () {
     local -r pair=apertium-${1##apertium-}
-    local -r skip="${@:2}"
+    local -r skip="${@:2}"      # assigning array to string
 
     get_dep "${pair}"
     # Mac has ancient bash, so no declare -A for us
     local -a deps=()
     local -a depn=()
     while read -r n dep; do
-        local orglang=$(split_org_langs "${dep}")
+        local orglang
+        orglang=$(split_org_langs "${dep}")
         local lang=${orglang##* }
-        if in_array "${lang}" ${skip[@]}; then
+        if in_array "${lang}" ${skip[@]}; then # intentionally unquoted skip
             echo
             echo "Skipping data ${dep} as instructed."
             echo
@@ -127,16 +129,6 @@ get_pair () {
 
     if [[ ${#deps[@]} -ne 0 ]]; then
         for dep in "${deps[@]}"; do
-            local orglang=$(split_org_langs "${dep}")
-            local org=${orglang%% *}
-            local lang=${orglang##* }
-            if [[ ${org} = giella && -d $GTHOME/langs/${lang} ]]; then
-                echo
-                echo "Found ${dep} in your \$GTHOME, symlinking to that to avoid recompilation."
-                echo
-                test -d langs || mkdir langs
-                ln -sf "$GTHOME/langs/sme" langs/sme
-            fi
             if ! get_data "${dep}"; then
                 echo "WARNING: Couldn't get dependency ${dep}; pair ${pair} might not get set up correctly."
             fi
@@ -168,6 +160,16 @@ split_org_langs () {
     echo "${org} ${langs}"
 }
 
+maybe_symlink_GTHOME () {
+    if [[ -d $GTHOME/$1 && ! -d $1 ]]; then
+        echo
+        echo "Found $1 in your \$GTHOME, symlinking to that to avoid recompilation."
+        echo
+        test -d langs || mkdir langs
+        ln -sf "$GTHOME/$1" "$1"
+    fi
+}
+
 get_data () {
     local -r orglangs=$(split_org_langs "$1")
     local -r org=${orglangs%% *}
@@ -177,6 +179,8 @@ get_data () {
         get_pair "$@"
     else
         if [[ $org = giella ]]; then
+            maybe_symlink_GTHOME "langs/${langs}"
+            maybe_symlink_GTHOME gtcore
             get_dep gtcore
             make_dep gtcore
         fi
