@@ -36,11 +36,11 @@
    "fie-bar" along with its data dependencies apertium-fie and
    apertium-bar downloaded and compiled by simply doing
 
-#+BEGIN_SRC sh
-wget https://raw.githubusercontent.com/unhammer/apertium-get/master/apertium-get
-chmod +x apertium-get
-./apertium-get fie-bar
-#+END_SRC
+   #+BEGIN_SRC sh
+   wget https://raw.githubusercontent.com/unhammer/apertium-get/master/apertium-get
+   chmod +x apertium-get
+   ./apertium-get fie-bar
+   #+END_SRC
 
    The data will be placed under your current working directory. If
    you later run =apertium-get fie-fum= from the same directory, it'll
@@ -59,7 +59,34 @@ chmod +x apertium-get
    version with =-x DEP=. For example, to avoid compiling the sme
    package before getting apertium-sme-nob, do:
 
-#+BEGIN_SRC sh
-sudo apt-get install giella-sme
-./apertium-get -x sme sme-nob
-#+END_SRC
+   #+BEGIN_SRC sh
+   sudo apt-get install giella-sme
+   ./apertium-get -x sme sme-nob
+   #+END_SRC
+
+** Giellatekno data
+
+   If you have the standard Giellatekno data setup with the SVN trunk
+   checkout in a =GTHOME= variable, then =apertium-get= will try to
+   reuse data from your =$GTHOME=, which should make compilation
+   faster. You should be able to run
+
+   #+BEGIN_SRC sh
+   ./apertium-get myv-mdf
+   #+END_SRC
+
+   and have it use the gtcore, langs/myv and langs/mdf from your
+   =GTHOME= SVN checkout.
+
+*** Using =apertium-get= without =GTHOME=
+
+    If =GTHOME= is unset, then =apertium-get= will download and
+    compile Giellatekno data just like Apertium data.
+
+    If you have =GTHOME=, but want to force =apertium-get= to not use
+    it for whatever reason, simply run the program with the variable
+    emptied, e.g.
+
+    #+BEGIN_SRC sh
+    GTHOME= ./apertium-get myv-mdf
+    #+END_SRC
