@@ -237,7 +237,7 @@ is_in () {
     shift
 
     for element; do
-        [[ $element = $pattern ]] && return 0
+        [[ ${element} = "${pattern}" ]] && return 0
     done
     return 1
 }
