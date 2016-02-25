@@ -15,7 +15,7 @@ before_script:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then ( svn co https://svn.code.sf.net/p/apertium/svn/trunk/lttoolbox/ && cd lttoolbox && ./autogen.sh && make -j4 && sudo make install ); fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then ( svn co https://svn.code.sf.net/p/apertium/svn/trunk/apertium/ && cd apertium && ./autogen.sh && make -j4 && sudo make install ); fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then ( svn co https://svn.code.sf.net/p/apertium/svn/trunk/apertium-lex-tools/ && cd apertium-lex-tools && ./autogen.sh && make -j4 && sudo make install ); fi
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then ( svn co svn://svn.code.sf.net/p/hfst/code/trunk/hfst3 && cd hfst && ./autogen.sh && ./configure --enable-proc --without-foma --enable-lexc --enable-all-tools && make -j4 && sudo make install ); fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then ( svn co svn://svn.code.sf.net/p/hfst/code/trunk/hfst3 && cd hfst3 && ./autogen.sh && ./configure --enable-proc --without-foma --enable-lexc --enable-all-tools && make -j4 && sudo make install ); fi
 
 script:
     - t/regression-tests
