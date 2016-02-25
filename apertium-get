@@ -57,24 +57,25 @@ bins_of_dep () {
 make_dep () {
     local -r dep=$1
     local -r dir=$(dir_of_dep "${dep}")
-    cd "${dir}"
-    pwd
     # Let cwd be GTHOME from here on in; langs should exist under this dir:
     GTHOME=$(pwd)
     GTCORE=$GTHOME/gtcore
     export GTHOME
     export GTCORE
-    ./autogen.sh
-    if [[ ${dep} = giella-* ]]; then
-        ./configure --enable-apertium --with-hfst --without-xfst  --disable-spellers --disable-analysers --disable-generators
-        make                    # giella so memory hungry, -j1
-    elif [[ ${dep} = gtcore ]]; then
-        ./configure
-        make -j3
-    else
-        make -j3
-    fi
-    cd - >/dev/null
+    (
+        cd "${dir}"
+        pwd
+        ./autogen.sh
+        if [[ ${dep} = giella-* ]]; then
+            ./configure --enable-apertium --with-hfst --without-xfst  --disable-spellers --disable-analysers --disable-generators
+            make                    # giella so memory hungry, -j1
+        elif [[ ${dep} = gtcore ]]; then
+            ./configure
+            make -j3
+        else
+            make -j3
+        fi
+    )
 }
 
 get_dep () {
