@@ -67,8 +67,8 @@ make_dep () {
         pwd
         ./autogen.sh
         if [[ ${dep} = giella-* ]]; then
-            ./configure --enable-apertium --with-hfst --without-xfst  --disable-spellers --disable-analysers --disable-generators
-            make                    # giella so memory hungry, -j1
+            ./configure --enable-apertium --with-hfst --enable-syntax
+            V=1 make                    # giella so memory hungry, -j1
         elif [[ ${dep} = gtcore ]]; then
             ./configure
             make -j3
