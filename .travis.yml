@@ -9,6 +9,9 @@ before_script:
     - echo "$TRAVIS_OS_NAME"
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then wget http://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash; fi
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then sudo apt-get -f install locales build-essential automake subversion pkg-config gawk libtool apertium-all-dev; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then sudo add-apt-repository -y ppa:dns/gnu; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then sudo apt-get update -qq; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then sudo apt-get install -qq -yy automake; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then brew update; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then brew install gperftools help2man pcre icu4c perl518 gawk; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then ( svn co http://beta.visl.sdu.dk/svn/visl/tools/vislcg3/trunk vislcg3 && cd vislcg3 && CMAKE_PREFIX_PATH=/usr/local/opt/icu4c:"${CMAKE_PREFIX_PATH}" ./cmake.sh && make -j4 && sudo make install ); fi
@@ -18,4 +21,5 @@ before_script:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then ( svn co svn://svn.code.sf.net/p/hfst/code/trunk/hfst3 && cd hfst3 && ./autogen.sh && ./configure --enable-proc --without-foma --enable-lexc --enable-all-tools && make -j4 && sudo make install ); fi
 
 script:
+    - automake --version  
     - t/regression-tests
