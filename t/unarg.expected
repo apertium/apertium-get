@@ -15,6 +15,7 @@ DESCRIPTION
 OPTIONS
        -h          display this help and exit
        -l          list available packages instead of setting up data
+       -k          keep going even if a dependency fails
        -x DEP      skip data dependency DEP (useful if DEP is installed
                    through a package manager); may be specified multiple
                    times
