@@ -107,8 +107,9 @@ in_array () {
 }
 
 get_pair () {
-    local -r pair=apertium-${1##apertium-}
-    local -r skip="${@:2}"      # assigning array to string
+    local -r keep_going=$1
+    local -r pair=apertium-${2##apertium-}
+    local -r skip="${@:3}"      # assigning array to string
 
     get_dep "${pair}"
     # Mac has ancient bash, so no declare -A for us
@@ -130,8 +131,17 @@ get_pair () {
 
     if [[ ${#deps[@]} -ne 0 ]]; then
         for dep in "${deps[@]}"; do
-            if ! get_data "${dep}"; then
+            if ! get_data "${keep_going}" "${dep}"; then
+                echo
                 echo "WARNING: Couldn't get dependency ${dep}; pair ${pair} might not get set up correctly."
+                echo
+                if ${keep_going}; then
+                    echo "WARNING: Continuing on as if nothing happened ..."
+                    echo
+                    sleep 1
+                else
+                    exit 1
+                fi
             fi
         done
     fi
@@ -184,7 +194,8 @@ maybe_symlink_GTHOME () {
 }
 
 get_data () {
-    local -r orglangs=$(split_org_langs "$1")
+    local -r keep_going=$1
+    local -r orglangs=$(split_org_langs "$2")
     local -r org=${orglangs%% *}
     local -r langs=${orglangs##* }
 
@@ -197,8 +208,8 @@ get_data () {
             get_dep gtcore
             make_dep gtcore
         fi
-        if get_dep "$1"; then
-            make_dep "$1"
+        if get_dep "$2"; then
+            make_dep "$2"
         else
             return 1
         fi
@@ -222,6 +233,7 @@ DESCRIPTION
 OPTIONS
        -h          display this help and exit
        -l          list available packages instead of setting up data
+       -k          keep going even if a dependency fails
        -x DEP      skip data dependency DEP (useful if DEP is installed
                    through a package manager); may be specified multiple
                    times
@@ -290,8 +302,9 @@ list_pairs () {
 
 main () {
     local do_list=false
+    local keep_going=false
     local -a skip=()
-    while getopts ":hlx:" opt; do
+    while getopts ":hklx:" opt; do
         case "$opt" in
             h)
                 show_help
@@ -302,6 +315,9 @@ main () {
                 ;;
             l)
                 do_list=true
+                ;;
+            k)
+                keep_going=true
                 ;;
             \?)
                 echo "ERROR: Invalid option: -$OPTARG" >&2
@@ -323,7 +339,7 @@ main () {
             exit 1
         fi
         for d in "$@"; do
-            get_data "$d" "${skip[@]:-}"
+            get_data "${keep_going}" "$d" "${skip[@]:-}"
         done
     fi
 }
