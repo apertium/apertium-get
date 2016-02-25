@@ -162,21 +162,23 @@ split_org_langs () {
 }
 
 maybe_symlink_GTHOME () {
-    if [[ -v GTHOME ]]; then
-        if [[ -d $GTHOME/$1 && ! -d $1 ]]; then
-            echo
-            echo "Found $1 in your \$GTHOME, symlinking to that to avoid recompilation."
-            echo
-            test -d langs || mkdir langs
-            ln -sf "$GTHOME/$1" "$1"
-        else
-            echo
-            echo "GTHOME is set but there is no $GTHOME/$1; will have to build $1 from scratch."
-            echo
-        fi
-    else
+    if [[ -d $1 ]]; then
+        echo
+        echo "Found $1 here, using that."
+        echo
+    elif [[ -z ${GTHOME+x} ]]; then
         echo
         echo "GTHOME is unset; will have to build $1 without it."
+        echo
+    elif [[ -d $GTHOME/$1 ]]; then
+        echo
+        echo "Found $1 in your \$GTHOME, symlinking to that to avoid recompilation."
+        echo
+        test -d langs || mkdir langs
+        ln -sf "$GTHOME/$1" "$1"
+    else
+        echo
+        echo "GTHOME is set but there is no $GTHOME/$1; will have to build $1 from scratch."
         echo
     fi
 }
