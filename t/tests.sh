@@ -40,3 +40,11 @@ echo "Try to set up fr-es …"
     cd apertium-fr-es
     make test >&2
 ) > fr-es.log || ( cat fr-es.log; exit 1 )
+
+echo "Try to set up sme-nob …"
+(
+    cd "${tmp}"
+    "${prog}" sme-nob 2>&1
+    cd apertium-sme-nob
+    make test >&2
+) > sme-nob.log || ( cat sme-nob.log exit 1 )
