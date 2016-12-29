@@ -1,6 +1,10 @@
 language: ruby
 # needs a language, and python doesn't work on travis-osx
 
+# let linux be Ubuntu 14.04 Trusty
+sudo: required
+dist: trusty
+
 os:
     - linux
     - osx
