@@ -109,7 +109,7 @@ in_array () {
 get_pair () {
     local -r keep_going=$1
     local -r pair=apertium-${2##apertium-}
-    local -r skip="${@:3}"      # assigning array to string
+    local -r skip="${@:3}"   # intentionally assigning array to string
 
     get_dep "${pair}"
     # Mac has ancient bash, so no declare -A for us
@@ -300,7 +300,26 @@ list_pairs () {
     done
 }
 
+sanity_check () {
+    if ! command -V svn >/dev/null; then
+        cat >&2 <<EOF
+
+You need to install SVN first!
+
+If you use apt-get, it's typically:
+
+  sudo apt-get install subversion
+
+If you use rpm/dnf, it's typically:
+
+  sudo dnf install subversion
+
+EOF
+    fi
+}
+
 main () {
+    sanity_check
     local do_list=false
     local keep_going=false
     local -a skip=()
