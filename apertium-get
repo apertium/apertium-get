@@ -30,6 +30,13 @@ discover_url_apertium () {
         fi
     done
     echo "WARNING: Couldn't find SVN url of ${dir}" >&2
+    if ! msg=$(svn ls --depth=empty "${svnroot}" 2>&1); then
+        printf "\n%s\n\n" "${msg}" >&2
+        if [[ ${msg} =~ svn:\ E670002 ]]; then
+            echo "You may want to see http://wiki.apertium.org/wiki/Using_SVN#Host_not_found_when_using_proxy" >&2
+            echo "or make sure you have a working internet connection." >&2
+        fi
+    fi
     return 1
 }
 discover_url_giella () {
