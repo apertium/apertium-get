@@ -22,8 +22,11 @@ diff <("${prog}" -? 2>&1) unarg.expected
 echo "List trunk …"
 diff <("${prog}" -l trunk) trunk.expected
 
-echo "Full listing should be big …"
+echo "Full pair listing should be big …"
 [[ $("${prog}" -l | wc -l) -ge 200 ]]
+
+echo "Full module listing should be fairly big …"
+[[ $("${prog}" -m | wc -l) -ge 100 ]]
 
 echo "Try to set up nno-nob …"
 (
@@ -32,6 +35,12 @@ echo "Try to set up nno-nob …"
     cd apertium-nno-nob
     make test >&2
 ) > nno-nob.log || ( cat nno-nob.log; exit 1 )
+
+echo "Try to set up nno-nob again (skipping build) …"
+(
+    cd "${tmp}"
+    "${prog}" -s nno-nob 2>&1 | grep -i skipping
+) > nno-nob.2.log || ( cat nno-nob.2.log; exit 1 )
 
 echo "Try to set up fr-es …"
 (
