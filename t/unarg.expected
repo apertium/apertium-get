@@ -11,11 +11,15 @@ DESCRIPTION
        With the -l option, it will list available language pairs. Give
        one or more MODULE arguments to list only pairs in that SVN
        module (one of "trunk", "staging", "nursery", "incubator").
+       The same behavior can be invoked for language modules using -m.
 
 OPTIONS
        -h          display this help and exit
        -l          list available packages instead of setting up data
+       -m          list available language modules instead of setting up
+                   data
        -k          keep going even if a dependency fails
+       -s          skip the build step for up-to-date dependencies/pairs
        -x DEP      skip data dependency DEP (useful if DEP is installed
                    through a package manager); may be specified multiple
                    times
