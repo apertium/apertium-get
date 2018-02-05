@@ -330,7 +330,7 @@ list_pairs () {
         echo "# Pairs in ${module}:"
         url="${svnroot}${module}/"
         svn ls "${url}" \
-            | grep '^apertium-[[:alpha:]]\{2,3\}-[[:alpha:]]\{2,3\}/*$' \
+            | grep -E '^apertium-[[:alpha:]]{2,3}(_[[:alpha:]]+)?-[[:alpha:]]{2,3}(_[[:alpha:]]+)?/*$' \
             | sed 's%^apertium-%%; s%/$%%'
         echo
     done
