@@ -4,7 +4,7 @@
 
 ### Globals:
 
-declare -r svnroot=https://svn.code.sf.net/p/apertium/svn/
+declare -r gitroot=https://raw.githubusercontent.com/apertium
 declare -ar pmodules=(trunk staging nursery incubator)
 declare -ar lmodules=(languages incubator)
 
@@ -22,20 +22,20 @@ discover_url_apertium () {
         modules=( ${lmodules[@]} )
     fi
     for module in "${modules[@]}"; do
-        url="${svnroot}${module}/${dir}"
-        if svn info "${url}" &>/dev/null; then
-            echo "Assuming SVN url of ${dir} is ${url}" >&2
+        submodules=$(curl -Ss --fail "${gitroot}/apertium-${module}/master/.gitmodules")
+        # url="${svnroot}${module}/${dir}"
+        if url=$(grep "[[:space:]]*url = .*/${dir}.git$" <<<"${submodules}"); then
+            url=${url#*url = }
+            echo "Assuming git url of ${dir} is ${url}" >&2
             echo "${url}"
             return 0
         fi
     done
-    echo "WARNING: Couldn't find SVN url of ${dir}" >&2
-    if ! msg=$(svn ls --depth=empty "${svnroot}" 2>&1); then
+    echo "WARNING: Couldn't find git url of ${dir}" >&2
+    if ! msg=$(curl -Ss --fail "${gitroot}/apertium-languages/master/.gitmodules"); then
         printf "\n%s\n\n" "${msg}" >&2
-        if [[ ${msg} =~ svn:\ E670002 ]]; then
-            echo "You may want to see http://wiki.apertium.org/wiki/Using_SVN#Host_not_found_when_using_proxy" >&2
-            echo "or make sure you have a working internet connection." >&2
-        fi
+        echo "You may want to see http://wiki.apertium.org/wiki/Using_SVN#Host_not_found_when_using_proxy" >&2
+        echo "or make sure you have a working internet connection." >&2
     fi
     return 1
 }
@@ -89,13 +89,18 @@ is_dep_updated () {
     local -r dep=$1
     local -r dir=$(dir_of_dep "${dep}")
     if [[ -d ${dir} ]]; then
+        if [[ -d "${dir}/.git" ]]; then
+            if [[ -z "$(cd "${dir}" && git fetch --dry-run)" ]]; then
+                echo yes
+            else
+                echo no
+            fi
+        fi
         if [[ -z $(svn status -qu "${dir}") ]]; then
-            echo "yes"
-            return 0
+            echo yes
         fi
     fi
-
-    echo "no"
+    echo no
 }
 
 get_dep () {
@@ -106,15 +111,20 @@ get_dep () {
         (
             cd "${dir}"
             printf "Updating existing %s (%s)\n" "${dir}" "$(pwd)"
-            svn up
+            if [[ -d .git ]]; then
+                git pull
+            else
+                svn up
+            fi
         )
     else
         if [[ ${dep} = giella-* || ${dep} = gtcore ]]; then
             url=$(discover_url_giella "${dir}")
+            svn checkout "${url}" "${dir}"
         else
             url=$(discover_url_apertium "${dir}")
+            git clone "${url}" "${dir}"
         fi
-        svn checkout "${url}" "${dir}"
     fi
 }
 
@@ -318,20 +328,19 @@ list_pairs () {
     # Sanity-check input:
     for module in "${modules[@]}"; do
         if ! is_in "${module}" "${pmodules[@]}"; then
-            echo "ERROR: '${module}' not recognised as an SVN language pair module"'!' >&2
+            echo "ERROR: '${module}' not recognised as a language pair module"'!' >&2
             echo >&2
             show_help >&2
             exit 1
         fi
     done
 
-    local url=
     for module in "${modules[@]}"; do
         echo "# Pairs in ${module}:"
-        url="${svnroot}${module}/"
-        svn ls "${url}" \
-            | grep -E '^apertium-[[:alpha:]]{2,3}(_[[:alpha:]]+)?-[[:alpha:]]{2,3}(_[[:alpha:]]+)?/*$' \
-            | sed 's%^apertium-%%; s%/$%%'
+        curl -Ss --fail "${gitroot}/apertium-${module}/master/.gitmodules" \
+            | grep "[[:space:]]*url = .*/${dir}.git$"                      \
+            | sed 's%.*url = .*/%%'                                        \
+            | sed 's/[.].git$//'
         echo
     done
 }
@@ -347,7 +356,7 @@ list_language_modules() {
     # Sanity-check input:
     for module in "${modules[@]}"; do
         if ! is_in "${module}" "${lmodules[@]}"; then
-            echo "ERROR: '${module}' not recognised as an SVN language module module"'!' >&2
+            echo "ERROR: '${module}' not recognised as an language module module"'!' >&2
             echo >&2
             show_help >&2
             exit 1
@@ -357,25 +366,27 @@ list_language_modules() {
     local url=
     for module in "${modules[@]}"; do
         echo "# Language modules in ${module}:"
-        url="${svnroot}${module}/"
-        svn ls "${url}" | grep '^apertium-[[:alpha:]]\{2,3\}/*$'
+        curl -Ss --fail "${gitroot}/apertium-${module}/master/.gitmodules" \
+            | grep "[[:space:]]*url = .*/${dir}.git$"                      \
+            | sed 's%.*url = .*/%%'                                        \
+            | sed 's/[.].git$//'
         echo
     done
 }
 
 sanity_check () {
-    if ! command -V svn >/dev/null; then
+    if ! command -V git >/dev/null; then
         cat >&2 <<EOF
 
-You need to install SVN first!
+You need to install git first!
 
 If you use apt-get, it's typically:
 
-  sudo apt-get install subversion
+  sudo apt-get install git
 
 If you use rpm/dnf, it's typically:
 
-  sudo dnf install subversion
+  sudo dnf install git
 
 EOF
     fi
