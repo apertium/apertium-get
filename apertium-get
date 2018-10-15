@@ -26,6 +26,8 @@ discover_url_apertium () {
         # url="${svnroot}${module}/${dir}"
         if url=$(grep "[[:space:]]*url = .*/${dir}.git$" <<<"${submodules}"); then
             url=${url#*url = }
+            # TODO: Option to use ssh urls?
+            url=${url/git@github.com:/https:\/\/github.com\/}
             echo "Assuming git url of ${dir} is ${url}" >&2
             echo "${url}"
             return 0
@@ -122,11 +124,9 @@ get_dep () {
         )
     else
         if [[ ${dep} = giella-* || ${dep} = gtcore ]]; then
-            url=$(discover_url_giella "${dir}")
-            svn checkout "${url}" "${dir}"
+            url=$(discover_url_giella "${dir}") && svn checkout "${url}" "${dir}"
         else
-            url=$(discover_url_apertium "${dir}")
-            git clone "${url}" "${dir}"
+            url=$(discover_url_apertium "${dir}") && git clone "${url}" "${dir}"
         fi
     fi
 }
