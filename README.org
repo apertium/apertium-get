@@ -1,7 +1,7 @@
 #+STARTUP: showall
 
 #+CAPTION: Build Status
-[[https://travis-ci.org/unhammer/apertium-get][https://travis-ci.org/unhammer/apertium-get.svg]]
+[[https://travis-ci.org/apertium/apertium-get][https://travis-ci.org/apertium/apertium-get.svg]]
 
 * apertium-get
 
@@ -37,7 +37,7 @@
    apertium-bar downloaded and compiled by simply doing
 
    #+BEGIN_SRC sh
-   wget https://raw.githubusercontent.com/unhammer/apertium-get/master/apertium-get
+   wget https://raw.githubusercontent.com/apertium/apertium-get/master/apertium-get
    chmod +x apertium-get
    ./apertium-get fie-bar
    #+END_SRC
