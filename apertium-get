@@ -320,6 +320,16 @@ is_in () {
     return 1
 }
 
+
+list_modules () {
+    curl -Ss --fail "${gitroot}/apertium-${module}/master/.gitmodules" \
+        | grep "[[:space:]]*url = .*.git$"                             \
+        | sed 's%.*url = .*/%%'                                        \
+        | sed 's/[.]git$//'                                            \
+        | sed 's/^apertium-//'
+    echo
+}
+
 list_pairs () {
     local -a modules=("$@")
     local module
@@ -340,11 +350,7 @@ list_pairs () {
 
     for module in "${modules[@]}"; do
         echo "# Pairs in ${module}:"
-        curl -Ss --fail "${gitroot}/apertium-${module}/master/.gitmodules" \
-            | grep "[[:space:]]*url = .*/${dir}.git$"                      \
-            | sed 's%.*url = .*/%%'                                        \
-            | sed 's/[.].git$//'
-        echo
+        list_modules "${module}"
     done
 }
 
@@ -366,14 +372,9 @@ list_language_modules() {
         fi
     done
 
-    local url=
     for module in "${modules[@]}"; do
         echo "# Language modules in ${module}:"
-        curl -Ss --fail "${gitroot}/apertium-${module}/master/.gitmodules" \
-            | grep "[[:space:]]*url = .*/${dir}.git$"                      \
-            | sed 's%.*url = .*/%%'                                        \
-            | sed 's/[.].git$//'
-        echo
+        list_modules "${module}"
     done
 }
 
