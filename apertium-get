@@ -92,12 +92,15 @@ is_dep_updated () {
         if [[ -d "${dir}/.git" ]]; then
             if [[ -z "$(cd "${dir}" && git fetch --dry-run)" ]]; then
                 echo yes
+                return 0
             else
                 echo no
+                return 0
             fi
         fi
         if [[ -z $(svn status -qu "${dir}") ]]; then
             echo yes
+            return 0
         fi
     fi
     echo no
