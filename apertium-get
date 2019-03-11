@@ -130,7 +130,7 @@ get_dep () {
             url=$(discover_url_apertium "${dir}") && if [[ $depth -gt 0 ]]; then
                 git clone --depth "${depth}" "${url}" "${dir}"
             else
-                git clone "${depth}" "${url}" "${dir}"
+                git clone "${url}" "${dir}"
             fi
         fi
     fi
