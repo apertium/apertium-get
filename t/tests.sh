@@ -28,10 +28,10 @@ echo "Full pair listing should be big …"
 echo "Full module listing should be fairly big …"
 [[ $("${prog}" -m | wc -l) -ge 100 ]]
 
-echo "Try to set up nno-nob …"
+echo "Try to set up nno-nob with --depth 1 …"
 (
     cd "${tmp}"
-    "${prog}" -x foo -x bar nno-nob 2>&1
+    "${prog}" -x foo -x bar -d 1 nno-nob 2>&1
     cd apertium-nno-nob
     make test >&2
 ) > nno-nob.log || ( cat nno-nob.log; exit 1 )

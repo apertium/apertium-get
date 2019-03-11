@@ -12,9 +12,9 @@ os:
 before_script:
     - echo "$TRAVIS_OS_NAME"
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then wget https://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash; fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then sudo apt-get -f install locales build-essential automake subversion pkg-config gawk libtool apertium-all-dev; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]];then sudo apt-get -f install locales build-essential automake subversion pkg-config gawk libtool apertium-all-dev shellcheck; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then brew update; fi
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then brew install gperftools help2man icu4c perl518 gawk; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then brew install gperftools help2man icu4c perl518 gawk libxml2 shellcheck; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]];then curl -Ss https://apertium.projectjj.com/osx/install-nightly.sh | sudo bash; fi
 
 script:

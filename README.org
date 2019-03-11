@@ -64,6 +64,13 @@
    ./apertium-get -x sme sme-nob
    #+END_SRC
 
+   You can also specify a git clone depth with =d DEPTH=, since some
+   of these git checkouts can be quite big and slow, e.g.:
+
+   #+BEGIN_SRC sh
+   ./apertium-get -d 1 nno-nob
+   #+END_SRC
+
 ** Giellatekno data
 
    If you have the standard Giellatekno data setup with the SVN trunk
