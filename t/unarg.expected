@@ -23,6 +23,7 @@ OPTIONS
        -x DEP      skip data dependency DEP (useful if DEP is installed
                    through a package manager); may be specified multiple
                    times
+       -d DEPTH    specify a --depth to 'git clone'
 
 EXAMPLES
        apertium-get nno-nob
