@@ -17,9 +17,9 @@ discover_url_apertium () {
     local url=
     local -a modules
     if [[ ${dir} = *-*-* ]]; then
-        modules=( ${pmodules[@]} )
+        modules=( "${pmodules[@]}" )
     else
-        modules=( ${lmodules[@]} )
+        modules=( "${lmodules[@]}" )
     fi
     for module in "${modules[@]}"; do
         submodules=$(curl -Ss --fail "${gitroot}/apertium-${module}/master/.gitmodules")
@@ -347,7 +347,7 @@ list_pairs () {
 
     # Defaulting to all modules:
     if [[ ${#modules[@]} -eq 0 ]]; then
-        modules=( ${pmodules[@]} )
+        modules=( "${pmodules[@]}" )
     fi
     # Sanity-check input:
     for module in "${modules[@]}"; do
@@ -371,7 +371,7 @@ list_language_modules() {
 
     # Defaulting to all modules:
     if [[ ${#modules[@]} -eq 0 ]]; then
-        modules=( ${lmodules[@]} )
+        modules=( "${lmodules[@]}" )
     fi
     # Sanity-check input:
     for module in "${modules[@]}"; do
