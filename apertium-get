@@ -361,7 +361,8 @@ list_pairs () {
 
     for module in "${modules[@]}"; do
         echo "# Pairs in ${module}:"
-        list_modules "${module}"
+        list_modules "${module}" |grep -e '-'
+        echo
     done
 }
 
@@ -385,7 +386,7 @@ list_language_modules() {
 
     for module in "${modules[@]}"; do
         echo "# Language modules in ${module}:"
-        list_modules "${module}"
+        list_modules "${module}" | grep -ve '-'
     done
 }
 
