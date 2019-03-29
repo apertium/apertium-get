@@ -247,11 +247,11 @@ get_data () {
     local -r orglangs=$(split_org_langs "$4")
     local -r org=${orglangs%% *}
     local -r langs=${orglangs##* }
-    local -r dep=${org}-${langs}
 
     if [[ ${langs} = *-* ]]; then
         get_pair "$@"
     else
+        local -r mdep=${org}-${langs}
         if [[ $org = giella ]]; then
             maybe_symlink_GTHOME "langs/${langs}"
             maybe_symlink_GTHOME gtcore
@@ -259,11 +259,11 @@ get_data () {
             make_dep gtcore
         fi
 
-        if [[ ${skip_if_up_to_date} == true && $(is_dep_updated "${dep}") == "yes" ]]; then
+        if [[ ${skip_if_up_to_date} == true && $(is_dep_updated "${mdep}") == "yes" ]]; then
             printf "Dependency %s is up-to-date, skipping update and build.\\n" "$3"
         else
-            if get_dep "${depth}" "${dep}"; then
-                make_dep "${dep}"
+            if get_dep "${depth}" "${mdep}"; then
+                make_dep "${mdep}"
             else
                 return 1
             fi
