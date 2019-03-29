@@ -49,3 +49,9 @@ echo "Try to set up fr-es …"
     cd apertium-fr-es
     make test >&2
 ) > fr-es.log || ( cat fr-es.log; exit 1 )
+
+echo "Try to set up ibo …"
+(
+    cd "${tmp}"
+    "${prog}" ibo 2>&1
+) > ibo.log || ( cat ibo.log; exit 1 )
