@@ -127,7 +127,6 @@ def get_pair(depth, keep_going, skip_if_up_to_date, pair, skip):
     deps = []
     conf = open(pair + '/configure.ac')
     dep_list = ap_check_ling.findall(conf.read())
-    print('\n\n\nDEPS: %s' % dep_list)
     conf.close()
     for n, dep in dep_list:
         org, lang = dep.split('-', 1)
