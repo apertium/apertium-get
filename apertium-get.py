@@ -13,7 +13,7 @@ from subprocess import (
     DEVNULL,
     CalledProcessError,
 )
-from enum import Enum, auto
+from enum import Enum
 
 ### Globals:
 
