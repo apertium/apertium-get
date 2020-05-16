@@ -9,7 +9,7 @@ canonpath () {
     # OS X doesn't have realpath :-/
     realpath "$1" 2>/dev/null || greadlink -f "$1" 2>/dev/null || ( cd "$(dirname "$1")" && echo "$(pwd)"/"$(basename "$1")")
 }
-prog=$(canonpath ../apertium-get)
+prog=$(canonpath ../apertium-get.py)
 
 tmp=$(mktemp -d -t apertium-get.XXXXXXXXXXX)
 trap 'rm -rf "${tmp}"' EXIT
@@ -17,7 +17,7 @@ trap 'rm -rf "${tmp}"' EXIT
 
 # TESTS:
 echo "Show help …"
-diff <("${prog}" -? 2>&1) unarg.expected
+diff <("${prog}" -h 2>&1) unarg.expected
 
 echo "List trunk …"
 diff <("${prog}" -l trunk) trunk.expected
