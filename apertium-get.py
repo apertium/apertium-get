@@ -30,12 +30,12 @@ GIELLA_SHARED_GIT = "giellalt/giella-shared.git"
 
 
 class Status(Enum):
-    NOT_STARTED = auto()
-    CLONED = auto()
-    PULLED = auto()
-    DONE = auto()
-    SKIPPED = auto()
-    FAILED = auto()
+    NOT_STARTED = 0
+    CLONED = 1
+    PULLED = 2
+    DONE = 3
+    SKIPPED = 4
+    FAILED = 5
 
 
 dep_paths = {}
