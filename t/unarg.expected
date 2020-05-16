@@ -1,6 +1,6 @@
 usage: apertium-get.py [-h] [-l [MODULES [MODULES ...]]]
                        [-m [MODULES [MODULES ...]]] [-k] [-s] [-x SKIP]
-                       [-d DEPTH]
+                       [-d DEPTH] [-S]
                        [pairs [pairs ...]]
 
 Download and build Apertium pairs and language data.
@@ -25,6 +25,7 @@ optional arguments:
                         times
   -d DEPTH, --depth DEPTH
                         specify a --depth to 'git clone'
+  -S, --ssh             use ssh urls in git clone rather than https
 
 EXAMPLES
        apertium-get nno-nob

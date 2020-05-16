@@ -70,7 +70,7 @@ def possible_paths(dep):
     return [dep]
 
 
-def find_or_clone(dep, depth, use_https=False):
+def find_or_clone(dep, depth, use_ssh):
     for name in possible_paths(dep):
         pth = os.getcwd() + "/" + name
         if os.path.isdir(pth + "/.git"):
@@ -84,7 +84,7 @@ def find_or_clone(dep, depth, use_https=False):
     if depth > 0:
         cmd += ["--depth", str(depth)]
 
-    url = git_https if use_https else git_ssh
+    url = git_ssh if use_ssh else git_https
     if dep == "giella-core":
         url += giella_core_git
     elif dep == "giella-shared":
@@ -221,9 +221,9 @@ def error_on_dep(dep, keep_going):
         sys.exit(1)
 
 
-def try_to_clone(dep, depth, keep_going, use_https):
+def try_to_clone(dep, depth, keep_going, use_ssh):
     try:
-        find_or_clone(dep, depth, use_https)
+        find_or_clone(dep, depth, use_ssh)
         get_deps(dep)
     except CalledProcessError:
         print("\nUnable to clone %s.\n" % dep)
@@ -323,10 +323,10 @@ def main():
         "-d", "--depth", type=int, default=0, help="specify a --depth to 'git clone'",
     )
     parser.add_argument(
-        "-H",
-        "--https",
+        "-S",
+        "--ssh",
         action="store_true",
-        help="use https urls in git clone rather than ssh",
+        help="use ssh urls in git clone rather than https",
     )
     parser.add_argument("pairs", nargs="*", help="pairs or modules to install")
     args = parser.parse_args()
@@ -347,21 +347,19 @@ def main():
 
         # download requested repos
         for dep in get_all_status(Status.NOT_STARTED):
-            try_to_clone(dep, args.depth, args.keep_going, args.https)
+            try_to_clone(dep, args.depth, args.keep_going, args.ssh)
 
         # download dependencies
         for dep in get_all_status(Status.NOT_STARTED):
-            try_to_clone(dep, args.depth, args.keep_going, args.https)
+            try_to_clone(dep, args.depth, args.keep_going, args.ssh)
 
         # download giella-core and giella-shared if we need them
         for dep in Dep_Status:
             if dep.startswith("lang-"):
                 if "GIELLA_CORE" not in os.environ:
-                    try_to_clone("giella-core", args.depth, args.keep_going, args.https)
+                    try_to_clone("giella-core", args.depth, args.keep_going, args.ssh)
                 if "GIELLA_SHARED" not in os.environ:
-                    try_to_clone(
-                        "giella-shared", args.depth, args.keep_going, args.https
-                    )
+                    try_to_clone("giella-shared", args.depth, args.keep_going, args.ssh)
                 break
 
         # update repos that were already downloaded
