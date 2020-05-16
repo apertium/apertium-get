@@ -31,7 +31,7 @@ echo "Full module listing should be fairly big …"
 echo "Try to set up nno-nob with --depth 1 …"
 (
     cd "${tmp}"
-    "${prog}" -x foo -x bar -d 1 nno-nob 2>&1
+    "${prog}" -x foo -x bar -d 1 -H nno-nob 2>&1
     cd apertium-nno-nob
     make test >&2
 ) > nno-nob.log || ( cat nno-nob.log; exit 1 )
@@ -39,13 +39,13 @@ echo "Try to set up nno-nob with --depth 1 …"
 echo "Try to set up nno-nob again (skipping build) …"
 (
     cd "${tmp}"
-    "${prog}" -s nno-nob 2>&1 | grep -i skipping
+    "${prog}" -s -H nno-nob 2>&1 | grep -i skipping
 ) > nno-nob.2.log || ( cat nno-nob.2.log; exit 1 )
 
 echo "Try to set up fr-es …"
 (
     cd "${tmp}"
-    "${prog}" fr-es 2>&1
+    "${prog}" -H fr-es 2>&1
     cd apertium-fr-es
     make test >&2
 ) > fr-es.log || ( cat fr-es.log; exit 1 )
@@ -53,5 +53,5 @@ echo "Try to set up fr-es …"
 echo "Try to set up ibo …"
 (
     cd "${tmp}"
-    "${prog}" ibo 2>&1
+    "${prog}" -H ibo 2>&1
 ) > ibo.log || ( cat ibo.log; exit 1 )
