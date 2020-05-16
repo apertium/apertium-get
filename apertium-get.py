@@ -13,11 +13,12 @@ from subprocess import (
     DEVNULL,
     CalledProcessError,
 )
+from enum import Enum
 
 ### Globals:
 
-pmodules = ["trunk", "staging", "nursery", "incubator"]
-lmodules = ["languages", "incubator"]
+PMODULES = ["trunk", "staging", "nursery", "incubator"]
+LMODULES = ["languages", "incubator"]
 
 git_ssh = "git@github.com:"
 git_https = "https://github.com/"
@@ -27,23 +28,26 @@ giella_git = "giellalt/lang-%s.git"
 giella_core_git = "giellalt/giella-core.git"
 giella_shared_git = "giellalt/giella-shared.git"
 
-NOT_STARTED = 0
-CLONED = 1
-PULLED = 2
-DONE = 3
-SKIPPED = 4
-FAILED = 5
 
-DEP_PATHS = {}
+class Status(Enum):
+    NOT_STARTED = 0
+    CLONED = 1
+    PULLED = 2
+    DONE = 3
+    SKIPPED = 4
+    FAILED = 5
+
+
+Dep_Paths = {}
 # e.g. 'apertium-eng' -> '~/apertium-eng'
 
-DEP_STATUS = {}
-# e.g. 'apertium-spa' -> CLONED
+Dep_Status = {}
+# e.g. 'apertium-spa' -> Status.CLONED
 
-DEP_REQS = {}
+Dep_Reqs = {}
 # e.g. 'apertium-tur-uzb' -> [(1, 'apertium-tur'), (2, 'apertium-uzb')]
 
-ap_check_ling = re.compile(r"AP_CHECK_LING\(\[(\d)\],\s+\[([\w-]+)\]", re.MULTILINE)
+AP_CHECK_LING = re.compile(r"AP_CHECK_LING\(\[(\d)\],\s+\[([\w-]+)\]", re.MULTILINE)
 # original pattern:
 # (awk -F'[][[:space:]]+' '/^ *AP_CHECK_LING\(/ && $2 && $4 {print $2, $4}' "${pair}"/configure.ac)
 
@@ -70,8 +74,8 @@ def find_or_clone(dep, depth, use_https=False):
     for name in possible_paths(dep):
         pth = os.getcwd() + "/" + name
         if os.path.isdir(pth + "/.git"):
-            DEP_PATHS[dep] = pth
-            DEP_STATUS[dep] = CLONED
+            Dep_Paths[dep] = pth
+            Dep_Status[dep] = Status.CLONED
             return
     dirname = None
     alt_url = None
@@ -100,65 +104,65 @@ def find_or_clone(dep, depth, use_https=False):
         cmd.append(dirname)
     try:
         run_command(cmd)
-        DEP_PATHS[dep] = dirname or (
+        Dep_Paths[dep] = dirname or (
             os.getcwd() + "/" + url.split("/")[-1].split(".")[0]
         )
-        DEP_STATUS[dep] = PULLED
+        Dep_Status[dep] = Status.PULLED
     except CalledProcessError:
         if alt_url:
             name = alt_url.split("/")[-1].split(".")[0]
             run_command(cmd[:-1] + [alt_url])
             print("\nWARNING: %s is actually named %s\n" % (dep, name))
-            DEP_PATHS[dep] = os.getcwd() + "/" + name
-            DEP_STATUS[dep] = PULLED
+            Dep_Paths[dep] = os.getcwd() + "/" + name
+            Dep_Status[dep] = Status.PULLED
         else:
             raise
 
 
 def get_deps(pair):
-    global DEP_STATUS
-    global DEP_PATHS
-    global DEP_REQS
-    conf = open(DEP_PATHS[pair] + "/configure.ac")
-    dep_list = ap_check_ling.findall(conf.read())
+    global Dep_Status
+    global Dep_Paths
+    global Dep_Reqs
+    conf = open(Dep_Paths[pair] + "/configure.ac")
+    dep_list = AP_CHECK_LING.findall(conf.read())
     conf.close()
-    DEP_REQS[pair] = []
+    Dep_Reqs[pair] = []
     for n, dep in dep_list:
-        if dep not in DEP_STATUS:
-            DEP_STATUS[dep] = NOT_STARTED
-        elif DEP_STATUS[dep] == SKIPPED:
+        if dep not in Dep_Status:
+            Dep_Status[dep] = Status.NOT_STARTED
+        elif Dep_Status[dep] == Status.SKIPPED:
             print("\nSkipping data %s as instructed.\n" % dep)
             continue
-        DEP_REQS[pair].append((dep, n))
+        Dep_Reqs[pair].append((dep, n))
 
 
 def update(dep, skip_update):
-    dirname = DEP_PATHS[dep]
+    dirname = Dep_Paths[dep]
     if skip_update:
         if get_output(["git", "fetch", "--dry-run"], dirname) == "":
-            DEP_STATUS[dep] = DONE
+            Dep_Status[dep] = Status.DONE
             return
     run_command(["git", "pull"], dirname)
-    DEP_STATUS[dep] = PULLED
+    Dep_Status[dep] = Status.PULLED
 
 
 def build(dep):
-    dirname = DEP_PATHS[dep]
+    dirname = Dep_Paths[dep]
     env = None
     if dep.startswith("lang-"):
         env = os.environ.copy()
         if "GIELLA_CORE" not in env:
-            env["GIELLA_CORE"] = DEP_PATHS.get("giella-core", "")
+            env["GIELLA_CORE"] = Dep_Paths.get("giella-core", "")
         if "GIELLA_SHARED" not in env:
-            env["GIELLA_SHARED"] = DEP_PATHS.get("giella-shared", "")
+            env["GIELLA_SHARED"] = Dep_Paths.get("giella-shared", "")
 
     run_command(["autoreconf", "-fvi"], dirname=dirname, env=env)
 
     cmd = ["./configure"]
     if dep.startswith("lang-"):
         cmd += ["--enable-apertium", "--with-hfst", "--enable-syntax"]
-    for name, idx in DEP_REQS[dep]:
-        pth = DEP_PATHS[name]
+    for name, idx in Dep_Reqs[dep]:
+        pth = Dep_Paths[name]
         if name.startswith("lang-"):
             pth += "/tools/mt/apertium"
         cmd.append("--with-lang%s=%s" % (idx, pth))
@@ -166,7 +170,7 @@ def build(dep):
 
     run_command(["make", "-j3"], dirname=dirname, env=env)
 
-    DEP_STATUS[dep] = DONE
+    Dep_Status[dep] = Status.DONE
 
 
 def list_pairs(module, getting_pairs):
@@ -198,13 +202,13 @@ def normalize_name(name):
 
 
 def get_all_status(status):
-    return [dep for dep in DEP_STATUS if DEP_STATUS[dep] == status]
+    return [dep for dep in Dep_Status if Dep_Status[dep] == status]
 
 
 def error_on_dep(dep, keep_going):
-    global DEP_STATUS
+    global Dep_Status
     if keep_going:
-        DEP_STATUS[dep] = FAILED
+        Dep_Status[dep] = Status.FAILED
         print("\nContinuing...\n")
         if dep.startswith("giella-"):
             print("WARNING: Giella language modules may fail to build correctly\n")
@@ -284,7 +288,7 @@ def main():
         "-l",
         "--list",
         nargs="*",
-        choices=pmodules,
+        choices=PMODULES,
         help="list available pairs in MODULES instead of setting up data. If no modules are specified, all pairs will be listed.",
         metavar="MODULES",
     )
@@ -292,7 +296,7 @@ def main():
         "-m",
         "--modules",
         nargs="*",
-        choices=lmodules,
+        choices=LMODULES,
         help="list available pairs in MODULES instead of setting up data. If no modules are specified, all pairs will be listed.",
         metavar="MODULES",
     )
@@ -330,20 +334,20 @@ def main():
         if len(args.pairs) == 0:
             parser.error("No language pair specified.\n")
         for arg in args.pairs:
-            DEP_STATUS[normalize_name(arg)] = NOT_STARTED
+            Dep_Status[normalize_name(arg)] = Status.NOT_STARTED
         for skip in args.skip or []:
-            DEP_STATUS[normalize_name(skip)] = SKIPPED
+            Dep_Status[normalize_name(skip)] = Status.SKIPPED
 
         # download requested repos
-        for dep in get_all_status(NOT_STARTED):
+        for dep in get_all_status(Status.NOT_STARTED):
             try_to_clone(dep, args.depth, args.keep_going)
 
         # download dependencies
-        for dep in get_all_status(NOT_STARTED):
+        for dep in get_all_status(Status.NOT_STARTED):
             try_to_clone(dep, args.depth, args.keep_going)
 
         # download giella-core and giella-shared if we need them
-        for dep in DEP_STATUS:
+        for dep in Dep_Status:
             if dep.startswith("lang-"):
                 if "GIELLA_CORE" not in os.environ:
                     try_to_clone("giella-core", args.depth, args.keep_going)
@@ -352,7 +356,7 @@ def main():
                 break
 
         # update repos that were already downloaded
-        for dep in get_all_status(CLONED):
+        for dep in get_all_status(Status.CLONED):
             try:
                 update(dep, args.skip_update)
             except CalledProcessError:
@@ -360,14 +364,14 @@ def main():
                 error_on_dep(dep, args.keep_going)
 
         # build everything
-        if DEP_STATUS.get("giella-core") == PULLED:
+        if Dep_Status.get("giella-core") == Status.PULLED:
             try_to_build("giella-core", args.keep_going)
-        if DEP_STATUS.get("giella-shared") == PULLED:
+        if Dep_Status.get("giella-shared") == Status.PULLED:
             try_to_build("giella-shared", args.keep_going)
-        for dep in get_all_status(PULLED):
+        for dep in get_all_status(Status.PULLED):
             if len(dep.split("-")) == 2:
                 try_to_build(dep, args.keep_going)
-        for dep in get_all_status(PULLED):
+        for dep in get_all_status(Status.PULLED):
             try_to_build(dep, args.keep_going)
 
 
