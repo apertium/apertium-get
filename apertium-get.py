@@ -65,7 +65,7 @@ def possible_paths(dep):
         lang = dep.split("-")[1]
         return ["giella-" + lang, "lang-" + lang]
     if len(dep.split("-")) == 3:
-        ap, l1, l2 = dep.split("-")
+        _, l1, l2 = dep.split("-")
         return ["apertium-%s-%s" % (l1, l2), "apertium-%s-%s" % (l2, l1)]
     return [dep]
 
@@ -123,17 +123,16 @@ def get_deps(pair):
     global dep_status
     global dep_paths
     global dep_reqs
-    conf = open(dep_paths[pair] + "/configure.ac")
-    dep_list = AP_CHECK_LING.findall(conf.read())
-    conf.close()
-    dep_reqs[pair] = []
-    for n, dep in dep_list:
-        if dep not in dep_status:
-            dep_status[dep] = Status.NOT_STARTED
-        elif dep_status[dep] == Status.SKIPPED:
-            print("\nSkipping data %s as instructed.\n" % dep)
-            continue
-        dep_reqs[pair].append((dep, n))
+    with open(dep_paths[pair] + "/configure.ac") as conf:
+        dep_list = AP_CHECK_LING.findall(conf.read())
+        dep_reqs[pair] = []
+        for n, dep in dep_list:
+            if dep not in dep_status:
+                dep_status[dep] = Status.NOT_STARTED
+            elif dep_status[dep] == Status.SKIPPED:
+                print("\nSkipping data %s as instructed.\n" % dep)
+                continue
+            dep_reqs[pair].append((dep, n))
 
 
 def update(dep, skip_update):
