@@ -14,6 +14,7 @@ from subprocess import (
     CalledProcessError,
 )
 from enum import Enum
+from shutil import which
 
 ### Globals:
 
@@ -237,7 +238,7 @@ def try_to_build(dep, keep_going):
         error_on_dep(dep, keep_going)
 
 
-def check_for_git():
+def check_for_tools():
     try:
         run(["git", "--version"], stdout=DEVNULL, stderr=DEVNULL)
     except CalledProcessError:
@@ -258,9 +259,17 @@ If you use rpm/dnf, it's typically:
         )
         sys.exit(1)
 
+    missing = []
+    for p in ["git", "curl", "autoreconf", "make", "pkg-config", "apertium", "lt-comp", "lrx-comp", "lsx-comp", "apertium-anaphora", "rtx-comp", "hfst-fst2fst", "vislcg3"]:
+        if which(p) == None:
+            missing.append(p)
+    if missing:
+        print("Missing programs:\n\t%s\n\nYou must have all the Apertium core tools and development environment installed for apertium-get to work.\n" % "\n\t".join(missing))
+        sys.exit(1)
+
 
 def main():
-    check_for_git()
+    check_for_tools()
     parser = argparse.ArgumentParser(
         description="Download and build Apertium pairs and language data.",
         epilog="""EXAMPLES

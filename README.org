@@ -9,7 +9,7 @@
   (with its monolingual dependencies) set up for development. It's
   meant for developers and people interested in hacking on the
   language data; if you just want to run the newest translators you
-  should use the [[http://wiki.apertium.org/wiki/Installation][nightly repositories]].
+  should use the [[https://wiki.apertium.org/wiki/Installation][nightly repositories]].
 
 ** Prerequisites
 
@@ -23,6 +23,9 @@
    - apertium
    - lttoolbox
    - apertium-lex-tools
+   - apertium-separable
+   - apertium-recursive
+   - apertium-anaphora
    - vislcg3
    - hfst
 
@@ -37,7 +40,7 @@
    apertium-bar downloaded and compiled by simply doing
 
    #+BEGIN_SRC sh
-   wget https://raw.githubusercontent.com/apertium/apertium-get/master/apertium-get
+   wget https://raw.githubusercontent.com/apertium/apertium-get/master/apertium-get.py -O apertium-get
    chmod +x apertium-get
    ./apertium-get fie-bar
    #+END_SRC
