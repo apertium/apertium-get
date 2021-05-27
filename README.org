@@ -15,7 +15,7 @@
 
    You'll need the newest Apertium development dependencies installed
    first, follow the "Prerequisites" step at
-   http://wiki.apertium.org/wiki/Installation but just skip installing
+   https://wiki.apertium.org/wiki/Installation but just skip installing
    any language data in the "Minimal installation from SVN" step –
    that's what this script handles.
 

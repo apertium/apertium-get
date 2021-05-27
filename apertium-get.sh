@@ -36,7 +36,7 @@ discover_url_apertium () {
     echo "WARNING: Couldn't find git url of ${dir}" >&2
     if ! msg=$(curl -Ss --fail "${gitroot}/apertium-languages/master/.gitmodules"); then
         printf "\n%s\n\n" "${msg}" >&2
-        echo "You may want to see http://wiki.apertium.org/wiki/Using_SVN#Host_not_found_when_using_proxy" >&2
+        echo "You may want to see https://wiki.apertium.org/wiki/Using_SVN#Host_not_found_when_using_proxy" >&2
         echo "or make sure you have a working internet connection." >&2
     fi
     return 1
