@@ -48,9 +48,14 @@ dep_status = {}
 dep_reqs = {}
 # e.g. 'apertium-tur-uzb' -> [(1, 'apertium-tur'), (2, 'apertium-uzb')]
 
-AP_CHECK_LING = re.compile(r"AP_CHECK_LING\(\[(\d)\],\s+\[([\w-]+)\]", re.MULTILINE)
-# original pattern:
+AP_CHECK_LING = re.compile(r"AP_CHECK_LING\(\[([^\]]+)\],\s+\[([\w-]+)\]", re.MULTILINE)
+# Original pattern:
 # (awk -F'[][[:space:]]+' '/^ *AP_CHECK_LING\(/ && $2 && $4 {print $2, $4}' "${pair}"/configure.ac)
+# Example inputs:
+#AP_CHECK_LING([1], [apertium-dan], [0.6.1])
+#AP_CHECK_LING([2n], [apertium-nno], [1.1.0])
+#AP_CHECK_LING([2b], [apertium-nob], [1.1.0])
+
 
 
 def get_output(command, **kwargs):
