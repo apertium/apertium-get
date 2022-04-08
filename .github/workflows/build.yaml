@@ -12,7 +12,8 @@ jobs:
            sudo apt-get -qy update
            sudo apt-get -qfy install wget ca-certificates
            wget -q https://apertium.projectjj.com/apt/install-nightly.sh -O - | sudo bash
-           sudo apt-get -qfy install --no-install-recommends build-essential cmake python3 apertium-dev apertium-anaphora apertium-lex-tools apertium-recursive apertium-separable autoconf automake cg3-dev gawk git libhfst-dev libtool locales pkg-config
+           sudo apt-get -qfy install --no-install-recommends build-essential cmake python3 autoconf automake gawk git libtool locales pkg-config
+           sudo apt-get -qfy install --no-install-recommends apertium-all-dev
     - name: envvars
       run: export V=1 VERBOSE=1
     - name: cmake
