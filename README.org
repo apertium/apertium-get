@@ -1,7 +1,7 @@
 #+STARTUP: showall
 
 #+CAPTION: Build Status
-[[https://travis-ci.org/apertium/apertium-get][https://travis-ci.org/apertium/apertium-get.svg]]
+[[https://github.com/apertium/apertium-get/actions][https://github.com/apertium/apertium-get/actions/workflows/build.yaml/badge.svg]]
 
 * apertium-get
 
