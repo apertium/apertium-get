@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(apertium-get
-	VERSION 1.0.1
+	VERSION 1.0.2
 	LANGUAGES NONE
 	)
 
